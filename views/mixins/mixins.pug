@@ -1,0 +1,700 @@
+mixin createPostForm(userLoggedIn)
+	.postFormContainer
+		.userImageContainer
+			if userLoggedIn.verifiedBrand
+				img(src=userLoggedIn.profilePic, onerror="if (this.src != '/images/profilePic.jpeg') this.src = '/images/profilePic.jpeg';", alt="User profile image", style="border-radius: 10%;")
+			else
+				img(src=userLoggedIn.profilePic, onerror="if (this.src != '/images/profilePic.jpeg') this.src = '/images/profilePic.jpeg';", alt="User profile image")
+		.textareaContainer
+			textarea#postTextarea(placeholder="What's happening?", style="    background-color:#eee;padding:10px;border-radius:15px;")
+			.buttonsContainer(style="display: flex; flex-direction: row;")
+				button#submitPostButton(disabled="") Post
+				button(type="button", data-toggle="modal", data-target="#imagePostUploadModal")
+					.imageUploadButton(style="color: var(--blue);margin-left:10px;margin-top:20%;display: flex; align-items: center; justify-content: center;")
+						i.fad.fa-camera(style="font-size:2.5vh;" color="var(--blue)")
+				button(type="button", data-toggle="modal", data-target="#codeUploadModal")
+					.codeUploadButton(style="color: #008800;margin-left:10px;margin-top:20%;display:flex; align-items:center; jutify-content:center;")
+						i.fad.fa-code(style="font-size:2.5vh;")
+
+mixin createReplyModal(userLoggedIn)
+	#replyModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='replyModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#replyModalLabel.modal-title Reply
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body
+					#originalPostContainer
+					.postFormContainer
+						.userImageContainer
+							img(src=userLoggedIn.profilePic, alt="User's profile picture")
+						.textareaContainer
+							textarea#replyTextarea(placeholder="What's happening?")
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Cancel
+					button#submitReplyButton.btn.btn-primary(type='button', disabled="") Reply
+
+mixin createDeletePostModal()
+	- const phrases = ["You know what they say - 'If at first you don't succeed, delete your post and try again.'","Let's be real, that post was a bit of a hot mess. Deleting it might just be the best decision you'll make all day.","You're not really going to leave that cringey post up for all your followers to see, are you? Delete it like it never happened.","Sure, you could keep that embarrassing post up for all eternity, but why not do yourself a favor and delete it? Trust me, your future self will thank you.","I'm not saying that post was bad, but...okay, fine, I am saying that. Delete it and start fresh - you'll thank me later."]
+	- const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)]
+	#deletePostModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='deletePostModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#deletePostModalLabel.modal-title Delete this post?
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body
+					i
+						p= randomPhrase
+					p You won't be able to undo this.
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Cancel
+					button#deletePostButton.btn.btn-primary(type='button') Delete
+
+mixin createPostModals(userLoggedIn)
+	+createReplyModal(userLoggedIn)
+	+createDeletePostModal()
+	+createPinnedPostModal()
+	+createUnpinPostModal()
+
+mixin createFollowButton(user, isFollowing)
+	- text = isFollowing ? "Unfollow" : "Follow"
+	- buttonClass = isFollowing ? "followButton following" : "followButton"
+	if isFollowing
+		button(class=buttonClass, data-user=user._id)
+			i.fas.fa-user-minus
+			span #{text}
+	else
+		button(class=buttonClass, data-user=user._id)
+			i.fas.fa-user-plus
+			span #{text}
+
+mixin createTab(name, href, isSelected)
+	- className = isSelected ? "tab active" : "tab"
+	a(class=className, href=href)
+		span #{name}
+
+mixin createImageUploadModal()
+	- const phrases = ["A picture is worth a thousand words, but a new profile picture is worth at least tens of followers.", "A picture is worth a thousand words, but a new profile picture is worth at least tens of followers.", "Your profile picture is the first thing people see. Make it count!","Your profile picture is the first thing people see. Make it count!","Your profile picture is the first thing people see. Make it count!", "How about ditching that old profile pic and giving us a fresh face? We promise not to judge... too much.", "How about a profile picture that's not just a picture of your pet? Unless your pet is like really, really ridiculously good-looking.", "How about a profile picture that's not just a picture of your pet? Unless your pet is like really, really ridiculously good-looking."]
+	- const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)]
+	#imageUploadModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='imageUploadModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#imageUploadModalLabel.modal-title Upload a new profile image
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body
+					i
+						p= randomPhrase
+					input#filePhoto(type="file", name="filePhoto")
+
+					.imagePreviewContainer
+						img#imagePreview
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+					button#imageUploadButton.btn.btn-primary(type='button') Upload
+
+mixin createCodeUploadModal()
+	#codeUploadModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='codeUploadModalLabel', aria-hidden='true')
+		.modal-dialog.modal-lg(role='document')
+			.modal-content
+				.modal-header
+					h5#codeUploadModalLabel.modal-title Add a code snippet
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body
+					.postFormContainer
+						.userImageContainer
+							img(src=userLoggedIn.profilePic, alt="User's profile picture")
+						.textareaContainer
+							textarea#codePostTextarea(placeholder="Post main body...")
+					.codeContainer
+						textarea#codePostCodeTextarea(placeholder="Code snippet...", style="height:40vh;")
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+					button#codePostUploadButton.btn.btn-primary(type='button') Post
+
+
+
+mixin createImagePostUploadModal(userLoggedIn)
+	#imagePostUploadModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='imagePostUploadModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#imagePostUploadModalLabel.modal-title Upload an image
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body
+					.postFormContainer
+						.userImageContainer
+							img(src=userLoggedIn.profilePic, alt="User's profile picture")
+						.textareaContainer
+							textarea#imagePostTextarea(placeholder="What's happening?")
+					input#postPhoto(type="file", name="postPhoto")
+					.imagePreviewContainer
+						img#postImagePreview
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+					button#imagePostUploadButton.btn.btn-primary(type='button') Post
+
+mixin createCoverPhotoUploadModal()
+	- const phrases = ["Looks like your cover photo could use a little love. Time for a refresh, don't you think?","Well, your old cover photo was...certainly a choice. Let's try something new, shall we?","It's time to give your profile the Hollywood treatment with a brand new cover photo!","Listen, I'm not saying your old cover photo was terrible, but...okay, fine, I am saying that. Let's do better this time around, yeah?","Your old cover photo was like a relic from the MySpace era. Let's bring your profile into the modern age."]
+	- const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)]
+	#coverPhotoUploadModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='coverPhotoUploadModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#coverPhotoUploadModalLabel.modal-title Upload a new cover photo
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body
+					i
+						p= randomPhrase
+					input#coverPhoto(type="file", name="coverPhoto")
+
+					.imagePreviewContainer
+						img#coverPreview
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+					button#coverPhotoButton.btn.btn-primary(type='button') Upload
+
+mixin createPinnedPostModal()
+	- const phrases = ["Pinning a post is like putting on your fanciest outfit - let's make sure your profile is dressed to impress.","Let's face it, that post is like the only good part of your profile. Pin it and pretend the rest doesn't exist.","Let's face it, that post is carrying the whole weight of your profile. Pin it to the top and take some of the pressure off the other posts.","That post is like the life raft in the ocean of your profile. Pin it to the top and hope it keeps the rest of your profile from sinking.","Pinning a post is like putting on your superhero cape - let's hope the post you picked is the hero that saves your profile from mediocrity."]
+	- const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)]
+	#confirmPinModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='confirmPinModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#confirmPinModalLabel.modal-title Pin this post?
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body
+					i
+						p= randomPhrase
+					p This post will be pinned to the top of your profile, you can unpin it at any time. You can only pin one post at a time.
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+					button#pinPostButton.btn.btn-primary(type='button') Pin
+
+mixin createUnpinPostModal()
+	- const phrases = ["You've had that post pinned for so long, it's starting to grow cobwebs. It's time to unpin and let some fresh air in."]
+	- const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)]
+	#unpinModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='unpinModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#unpinModalLabel.modal-title Unpin this post?
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body
+					i
+						p= randomPhrase
+					p This post will be unpinned, you can pin it again at any time.
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+					button#unpinPostButton.btn.btn-primary(type='button') Unpin
+
+mixin createChatImage(chatData, userLoggedIn)
+	if(!chatData)
+		return 
+
+	- var i = 0
+	- var maxImagesToShow = 4
+	- var remainingUsers = chatData.users.length - maxImagesToShow
+	- remainingUsers-- // We wont show the current user in the chat images
+
+	.chatImagesContainer
+		if remainingUsers > 0
+			.userCount
+				span +#{remainingUsers+1}
+
+		each user in chatData.users
+			if chatData.users.length != 1 && user._id == userLoggedIn._id
+				- continue
+			else if i >= maxImagesToShow
+				- break
+
+			img(src=user.profilePic alt="User's profile picture", title=user.firstName)
+			- i++
+
+mixin createChatNameModal(chat)
+	#chatNameModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='chatNameModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#chatNameModalLabel.modal-title Change the chat name
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body
+					input#chatNameTextbox(type="text", placeholder="Enter a new chat name...", value=chat.chatName)
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+					button#chatNameButton.btn.btn-primary(type='button') Save
+
+mixin createSendImageMessageModal()
+	#sendImageMessageModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='sendImageMessageModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#sendImageMessageModalLabel.modal-title Send image message
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body
+					input#messagePhoto(type="file", name="messagePhoto")
+					.imagePreviewContainer
+						img#messageImagePreview
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+					button#imageMessageSendButton.btn.btn-primary(type='button') Send
+
+mixin createSettingsModals(userLoggedIn)
+	+createChangeNameModal(userLoggedIn)
+	+createChangeUsernameModal(userLoggedIn)
+	+createChangeEmailModal(userLoggedIn)
+	+createChangeBioModal(userLoggedIn)
+	+createChangePasswordModal(userLoggedIn)
+	+createMultiFactorModal(userLoggedIn)
+	+createDeleteAccountModal(userLoggedIn)
+
+mixin createChangeNameModal(user)
+	#changeNameModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='changeNameModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#changeNameModalLabel.modal-title Change your name
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body
+					span.errorMessage.errorMessageName
+					span(style="font-weight:800;") First name 
+					input#firstNameTextbox(type="text", placeholder="Enter your first name...", value=user.firstName)
+					span(style="font-weight:800;") <br>Last name (optional) 
+					input#lastNameTextbox(type="text", placeholder="Enter your last name...", value=user.lastName)
+					p
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+					button#changeNameButton.btn.btn-primary(type='button') Save
+
+mixin createChangeUsernameModal(user)
+	#changeUsernameModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='changeUsernameModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#changeUsernameModalLabel.modal-title Change your username
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body
+					span.errorMessage.errorMessageUsername
+					span(style="font-weight:800;") @
+					input#changeUsernameTextbox(type="text", placeholder=user.username)
+					p
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+					button#changeUsernameButton.btn.btn-primary(type='button') Save
+
+mixin createChangeEmailModal(user)
+	#changeEmailModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='changeEmailModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#changeEmailModalLabel.modal-title Change your email address
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body
+					span.errorMessage.errorMessageEmail
+					span(style="font-weight:800;") Email address 
+					input#emailTextbox(type="text", placeholder=user.email)
+					p
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+					button#changeEmailButton.btn.btn-primary(type='button') Save
+					
+mixin createChangeBioModal(user)
+	#changeBioModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='changeBioModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#changeBioModalLabel.modal-title Change your bio
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body
+					span.errorMessage.errorMessageBio
+					span(style="font-weight:800;") Bio 
+					textarea#bioTextbox(type="text", style="width:100%;height:15vh;white-space: pre-wrap;", placeholder="Enter your bio...") #{user.bio}
+					p
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+					button#changeBioButton.btn.btn-primary(type='button') Save
+
+mixin createChangePasswordModal(user)
+	#changePasswordModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='changePasswordModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#changePasswordModalLabel.modal-title Change your password
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body(style="padding:0;")
+					span.errorMessage.errorMessagePassword
+					span(style="font-weight:800;") Current password 
+					input#oldPasswordTextbox(type="password", style="width:50%;", placeholder="Enter your current password...")
+					br
+					span(style="font-weight:800;") New password 
+					input#newPasswordTextbox(type="password", style="width:50%;", placeholder="Enter your new password...")
+					br
+					span(style="font-weight:800;") Confirm new password 
+					input#confirmPasswordTextbox(type="password", style="width:50%;", placeholder="Confirm your new password...")
+					p
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+					button#changePasswordButton.btn.btn-primary(type='button') Save
+
+mixin createMultiFactorModal(user)
+	#multiFactorModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='multiFactorModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#multiFactorModalLabel.modal-title Two-factor authentication (2FA)
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body
+					span(style="font-weight:600;") 2FA is coming soon!
+
+mixin createDeleteAccountModal(user)
+	#deleteAccountModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='deleteAccountModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content 
+				.modal-header 
+					h5#deleteAccountModalLabel.modal-title Delete your account?
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body
+					span.errorMessage.errorMessageDelete
+					p Are you sure you want to delete your account? This action cannot be undone.
+					p Enter your password to confirm:
+					input#deleteAccountPasswordTextbox(type="password", placeholder="Enter your password...")
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Cancel
+					button#deleteAccountButton.btn.btn-primary(type='button', style='background-color:red;') Delete
+
+mixin createLegalModals()
+	+createPrivacyPolicyModal()
+	+createTermsOfServiceModal()
+	+createCookiesModal()
+	+createOpenSourceModal()
+	+createDisclaimerModal()
+
+mixin createPrivacyPolicyModal()
+	#privacyPolicyModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='privacyPolicyModalLabel', aria-hidden='true')
+		.modal-dialog.modal-lg(role='document')
+			.modal-content
+				.modal-header
+					h5#privacyPolicyModalLabel.modal-title Kiwe Privacy Policy
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body(style="padding:0;")
+					p(style="padding: 0 1rem;") Effective Date: 24/10/23 <br> At Kiwe, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy outlines our practices concerning the collection, use, and disclosure of your personal data when you use the Kiwe social media platform. <br> Please read this Privacy Policy carefully to understand how we handle your personal information. By using Kiwe, you consent to the practices described in this policy.
+					h3(style="padding: 0 1rem;") 1. Information We Collect
+					h4(style="padding: 0 1rem;") a. Account Information
+					ul
+						li(style="padding: 0 1rem;") When you create a Kiwe account, we may collect your name, email address, username, and password.
+					h4(style="padding: 0 1rem;") b. Profile Information
+					ul
+						li(style="padding: 0 1rem;") You have the option to provide additional profile information, such as a profile picture, bio, location, and website.
+					h4(style="padding: 0 1rem;") c. User-Generated Content
+					ul
+						li(style="padding: 0 1rem;") We collect the content you post on Kiwe, including tweets, images, videos, and other media.
+					h4(style="padding: 0 1rem;") d. Communications
+					ul
+						li(style="padding: 0 1rem;") We may collect communications between you and other Kiwe users, as well as feedback you provide to us.
+					h4(style="padding: 0 1rem;") e. Usage data
+					ul
+						li(style="padding: 0 1rem;") We collect information about how you use Kiwe, including your interactions with other users, the content you view, and the frequency, date, time and duration of your activities, device information, and your IP address.
+					h4(style="padding: 0 1rem;") f. Cookies and Tracking Technologies
+					ul
+						li(style="padding: 0 1rem;") We may use cookies and similar tracking technologies to collect data about your browsing and usage patterns on Kiwe.
+					h3(style="padding: 0 1rem;") 2. How We Use Your Information
+					p(style="padding: 0 1rem;") We use the information we collect for the following purposes:
+					ul
+						li(style="padding: 0 1rem;") To provide and maintain Kiwe's services.
+						li(style="padding: 0 1rem;") To personalize and improve your Kiwe experience.
+						li(style="padding: 0 1rem;") To communicate with you, including for customer support.
+						li(style="padding: 0 1rem;") To ensure compliance with our Terms of Service and other legal requirements.
+						li(style="padding: 0 1rem;") To understand how you use Kiwe, diagnose problems, and optimize the platform.
+						li(style="padding: 0 1rem;") To develop new features and services.
+					h3(style="padding: 0 1rem;") 3. Data Sharing and Disclosure
+					p(style="padding: 0 1rem;") We may share your information with third parties in the following circumstances:
+					ul
+						li(style="padding: 0 1rem;") With other Kiwe users as you interact with them on the platform.
+						li(style="padding: 0 1rem;") With third-party service providers who assist us in providing Kiwe's services.
+						li(style="padding: 0 1rem;") With our moderators and administrators to enforce our Terms of Service and other policies.
+						li(style="padding: 0 1rem;") With law enforcement or other third parties if we believe your actions are inconsistent with our Terms of Service, or to protect the rights, property, or safety of Kiwe, its users, or others.
+						li(style="padding: 0 1rem;") With law enforcement, government agencies, or other third parties if required by applicable law.
+						li(style="padding: 0 1rem;") In connection with a merger, acquisition, or sale of all or a portion of our assets, or other business transfer, as permitted by applicable laws.
+					h3(style="padding: 0 1rem;") 4. Data Retention
+					p(style="padding: 0 1rem;") We retain your information for as long as necessary to provide you with Kiwe's services and to comply with our legal obligations, resolve disputes, and enforce our agreements.
+					h3(style="padding: 0 1rem;") 5. Data Security
+					p(style="padding: 0 1rem;") We take reasonable measures to protect your information from unauthorized access, alteration, or destruction; however, no method of transmission over the Internet, or method of electronic storage, is 100% secure. Therefore, we cannot guarantee its absolute security.
+					h3(style="padding: 0 1rem;") 6. International Data Transfers
+					p(style="padding: 0 1rem;") Kiwe is hosted in the United Kingdom. If you are accessing Kiwe from outside the United Kingdom, please be aware that your information may be transferred to, stored, and processed by us in our facilities and by those third parties with whom we may share your personal information (see "Data Sharing and Disclosure" above), in the United Kingdom and other countries, as permitted by local laws and regulations. By using Kiwe, you consent to the transfer of your information to the United Kingdom and other countries.
+					h3(style="padding: 0 1rem;") 7. Your Choices
+					p(style="padding: 0 1rem;") You have the following choices regarding your information:
+					ul 
+						li(style="padding: 0 1rem;") You can review and update your account information in your Kiwe profile settings.
+						li(style="padding: 0 1rem;") You can delete your account at any time by going to your Kiwe profile settings.
+						li(style="padding: 0 1rem;") You also have all the rights granted under the Data Protection Act 2018 and the General Data Protection Regulation (GDPR), including the right to access, correct, and delete your personal data, and the right to object to our use of your personal data for direct marketing purposes. If you want to exercise these rights, or other rights granted to you by applicable local laws, please contact us at data@kiwe.social
+					h3(style="padding: 0 1rem;") 8. Children's Privacy
+					p(style="padding: 0 1rem;") Kiwe is not intended for children under the age of 13. We do not knowingly collect personal information from children under the age of 13. If you are under 13, please do not use Kiwe or provide any information to us. If we learn that we have collected personal information from a child under the age of 13, we will take steps to delete such information from our files as soon as possible. If you are a parent or guardian and believe your child has provided personal information to us, please contact us at data@kiwe.social to have it removed.
+					h3(style="padding: 0 1rem;") 9. Changes to this Privacy Policy
+					p(style="padding: 0 1rem;") We may update this Privacy Policy from time to time. If we make any material changes to our Privacy Policy, we will notify you by posting the revised Privacy Policy on Kiwe, and where appropriate, by other means. By continuing to use Kiwe after these changes are made, you agree to the revised Privacy Policy. You can review the most current version of our Privacy Policy at any time by visiting this page.
+					h3(style="padding: 0 1rem;") 10. Contact Us
+					p(style="padding: 0 1rem;") If you have any questions about this Privacy Policy, please contact us at support@kiwe.social
+					br
+
+mixin createTermsOfServiceModal()
+	#termsOfServiceModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='termsOfServiceModalLabel', aria-hidden='true')
+		.modal-dialog.modal-lg(role='document')
+			.modal-content
+				.modal-header
+					h5#termsOfServiceModalLabel.modal-title Kiwe Terms of Service
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body(style="padding:0;")
+					p(style="padding: 0 1rem;") Effective Date: 24/10/23 <br> These Terms of Service ("Terms") govern your access to and use of Kiwe's services, including our various websites, SMS, APIs, email notifications, applications, buttons, widgets, ads, commerce services, and our other covered services (https://kiwe.social) that link to these Terms (collectively, the "Services"), and any information, text, links, graphics, photos, videos, or other materials or arrangements of materials uploaded, downloaded or appearing on the Services (collectively referred to as "Content"). By using the Services you agree to be bound by these Terms.
+					h3(style="padding: 0 1rem;") 1. Acceptance of Terms
+					p(style="padding: 0 1rem;") By accessing or using Kiwe, you confirm that you are at least 13 years old and have the legal capacity to enter into these Terms. If you are under 13, you may only use Kiwe with parental or legal guardian consent.
+					h3(style="padding: 0 1rem;") 2. Your Kiwe Account
+					h4(style="padding: 0 1rem;") 2.1 Registration
+					p(style="padding: 0 1rem;") You may be required to create an account to use certain features of Kiwe. When creating an account, you agree to provide accurate and complete information. You are responsible for maintaining the confidentiality of your account credentials and for all activities associated with your account, and you accept responsibility for all activities that occur under your account. If you believe that your account is no longer secure, then you must immediately change your password or contact us at support@kiwe.social
+					h4(style="padding: 0 1rem;") 2.2 Content and Conduct
+					p(style="padding: 0 1rem;") You are solely responsible for the content you post on Kiwe. You agree not to use the Service for any of the following:
+					ul 
+						li(style="padding: 0 1rem;") Posting content that is illegal, abusive, harassing, threatening, defamatory, obscene, abusive, harassing or otherwise objectionable.
+						li(style="padding: 0 1rem;") Posting content that infringes or violates someone else's rights or otherwise violates the law.
+						li(style="padding: 0 1rem;") Posting content that contains private information of any third party, including, without limitation, addresses, phone numbers, email addresses, Social Security numbers, and credit card numbers.
+						li(style="padding: 0 1rem;") Posting content that impersonates any person or entity, including, without limitation, a Kiwe employee, or falsely states or otherwise misrepresents your affiliation with a person or entity.
+						li(style="padding: 0 1rem;") Posting content that includes malicious content such as malware, Trojan horses, or viruses, or otherwise interferes with any user's access to the Service.
+						li(style="padding: 0 1rem;") Posting content that constitutes spam, such as unwanted promotional or commercial content, or unwanted or mass solicitation.
+						li(style="padding: 0 1rem;") Any form of unauthorised automated access to the Service.
+						li(style="padding: 0 1rem;") Any other activity that Kiwe deems in its sole discretion to be in violation of these Terms.
+					h4(style="padding: 0 1rem;") 2.3 Account Termination
+					p(style="padding: 0 1rem;") We reserve the right to terminate your account or restrict your access to Kiwe if we determine, in our sole discretion, that you have violated these Terms or any of our other policies that you can view on our legal page, with or without notice.
+					h3(style="padding: 0 1rem;") 3. Intellectual Property
+					p(style="padding: 0 1rem;") Kiwe and its original content, features, and functionality are owned by Kiwe and are protected by international copyright.
+					p(style="padding: 0 1rem;") You retain ownership of the content you post on Kiwe. By posting content on Kiwe, you grant us a non-exclusive, worldwide, royalty-free, irrevocable, sub-licensable, perpetual license to use, display, edit, modify, reproduce, distribute, store, and prepare derivative works of your content to provide the Services and to promote Kiwe, your Kiwe account, or the Services in general, in any formats and through any channels, including across any Kiwe Services or third-party website or advertising medium, with or without attribution and with or without notice.
+					h3(style="padding: 0 1rem;") 4. Third-Party Content
+					p(style="padding: 0 1rem;") Kiwe may contain links to third-party websites, advertisers, services, special offers, or other events or activities that are not owned or controlled by Kiwe. We do not endorse or assume any responsibility for any such third-party sites, information, materials, products, or services. If you access any third party website, service, or content from Kiwe, you do so at your own risk and you agree that Kiwe will have no liability arising from your use of or access to any third-party website, service, or content.
+					h3(style="padding: 0 1rem;") 5. Privacy
+					p(style="padding: 0 1rem;") Your use of Kiwe is also governed by our Privacy Policy. Please review it to understand how we collect, use, and share your information.
+					h3(style="padding: 0 1rem;") 6. Disclaimer of Warranties
+					p(style="padding: 0 1rem;") Kiwe is provided "as is" and "as available" without warranties of any kind. We do not guarantee the accuracy, availability, or reliability of the Service.
+					h3(style="padding: 0 1rem;") 7. Limitation of Liability
+					p(style="padding: 0 1rem;") To the fullest extent permitted by law, in no event will Kiwe, its directors, employees, partners, suppliers, or content providers be liable for any indirect, incidental, punitive, consequential, special, or exemplary damages of any kind, including but not limited to damages (i) resulting from your access to, use of, or inability to access or use Kiwe; (ii) for any lost profits, data loss, or cost of procurement or substitute goods or services; or (iii) for any conduct of content of any third party on Kiwe.
+					h3(style="padding: 0 1rem;") 8. Indemnification
+					p(style="padding: 0 1rem;") You agree to indemnify, defend, and hold harmless Kiwe, its directors, employees, partners, suppliers, and content providers from and against any claims, losses, damages, liabilities, judgments, demands, and costs, including reasonable attorneys' fees, arising out of or relating to your use of Kiwe or your violation of these Terms.
+					h3(style="padding: 0 1rem;") 9. Changes to these Terms
+					p(style="padding: 0 1rem;") We may update these Terms from time to time. If we make any material changes to our Terms, we will notify you by posting the revised Terms on Kiwe, and where appropriate, by other means. By continuing to use Kiwe after these changes are made, you agree to the revised Terms. You can review the most current version of our Terms at any time by visiting this page.
+					h3(style="padding: 0 1rem;") 10. Governing Law
+					p(style="padding: 0 1rem;") These Terms are governed by the laws of the United Kingdom, without regard to its conflict of laws principles. If any provision of these Terms is found to be invalid by any court having competent jurisdiction, the invalidity of such provision will not affect the validity of the remaining provisions of these Terms, which will remain in full force and effect. Our failure to enforce any term or condition of these Terms will not be considered a waiver of that provision.
+					h3(style="padding: 0 1rem;") 11. Contact Us
+					p(style="padding: 0 1rem;") If you have any questions about these Terms, please contact us at support@kiwe.social
+					br
+			
+mixin createCookiesModal()
+	#cookiesModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='cookiesModalLabel', aria-hidden='true')
+		.modal-dialog.modal-lg(role='document')
+			.modal-content
+				.modal-header
+					h5#cookiesModalLabel.modal-title Kiwe Cookie Policy
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body(style="padding:0;")
+					p(style="padding: 0 1rem;") Last Updated: 24/10/23
+					h3(style="padding: 0 1rem;") Introduction
+					p(style="padding: 0 1rem;") This Cookie Policy explains how Kiwe ("Kiwe", "we", "us", and "ours") uses cookies and similar technologies to recognize you when you visit our websites at https://kiwe.social, ("Websites"). It explains what these technologies are and why we use them, as well as your rights to control our use of them.
+					h3(style="padding: 0 1rem;") What are cookies?
+					p(style="padding: 0 1rem;") Cookies are small data files that are placed on your computer or mobile device when you visit a website. Cookies are widely used by website owners in order to make their websites work, or to work more efficiently, as well as to provide reporting information.
+					h3(style="padding: 0 1rem;") How we use cookies:
+					p(style="padding: 0 1rem;") We use cookies for various purposes, including but not limited to:
+					ul 
+						li(style="padding: 0 1rem;") Essential Cookies: These cookies are necessary for the website to function properly. They help you navigate our site and use its features.
+						li(style="padding: 0 1rem;") Analytical/Performance Cookies: These cookies help us understand how you interact with our website, enabling us to improve its performance.
+						li(style="padding: 0 1rem;") Functionality Cookies: These cookies are used to remember your preferences and provide personalized content and features.
+						li(style="padding: 0 1rem;") Advertising Cookies: We, or our third-party partners, may use cookies to deliver relevant advertisements to you.
+					h3(style="padding: 0 1rem;") Your Choices Regarding Cookies
+					p(style="padding: 0 1rem;") If you would like to delete cookies or instruct your web browser to delete or refuse cookies, please visit the help pages of your web browser. Please note, however, that if you delete cookies or refuse to accept them, you might not be able to use all of the features we offer, you may not be able to store your preferences, and some of our pages might not display properly.
+					h3(style="padding: 0 1rem;") Third-Party Cookies
+					p(style="padding: 0 1rem;") Some cookies on Kiwe may be placed by third-party service providers, such as advertisers and analytics partners. These third parties may use cookies to collect information about your online activities across different websites.
+					h3(style="padding: 0 1rem;") Changes to this Cookie Policy
+					p(style="padding: 0 1rem;") We may update this Cookie Policy from time to time. If we make any material changes to our Cookie Policy, we will notify you by posting the revised Cookie Policy on Kiwe, and where appropriate, by other means. By continuing to use Kiwe after these changes are made, you agree to the revised Cookie Policy. You can review the most current version of our Cookie Policy at any time by visiting this page.
+					h3(style="padding: 0 1rem;") Contact Us
+					p(style="padding: 0 1rem;") If you have any questions about this Cookie Policy, please contact us at support@kiwe.social
+					h3(style="padding: 0 1rem;") Additional Information
+					p(style="padding: 0 1rem;") For more information about our data practices, please review our Privacy Policy. You can find our Privacy Policy in the legal section of your settings.
+					br
+
+mixin createOpenSourceModal()
+	#openSourceModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='openSourceModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#openSourceModalLabel.modal-title Kiwe Open Source
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body(style="padding:0;")
+					p(style="padding: 0 1rem;") Kiwe uses a number of open-source projects and licensed assets to work properly. We would like to thank the following projects and their maintainers for their contributions to Kiwe:
+					ul 
+						li(style="padding: 0 1rem;") Loading icons from <strong><a href="https://loading.io/">loading.io</a></strong>
+						li(style="padding: 0 1rem;") Many icons from <strong><a href="https://fontawesome.com/">Font Awesome</a></strong>
+					p(style="padding: 0 1rem;") Kiwe is built on the following open-source npm projects:
+					ul 
+						li(style="padding: 0 1rem;") <strong><a href="https://nodejs.org/en/">Node.js</a></strong>
+						li(style="padding: 0 1rem;") <strong><a href="https://expressjs.com/">Express</a></strong>
+						li(style="padding: 0 1rem;") <strong><a href="https://www.mongodb.com/">MongoDB</a></strong>
+						li(style="padding: 0 1rem;") <strong><a href="https://mongoosejs.com/">Mongoose</a></strong>
+						li(style="padding: 0 1rem;") <strong><a href="https://www.npmjs.com/package/express-session">express-session</a></strong>
+						li(style="padding: 0 1rem;") <strong><a href="https://www.npmjs.com/package/express-validator">email-validator</a></strong>
+						li(style="padding: 0 1rem;") <strong><a href="https://www.npmjs.com/package/body-parser">body-parser</a></strong>
+						li(style="padding: 0 1rem;") <strong><a href="https://www.npmjs.com/package/bcrypt">bcrypt</a></strong>
+						li(style="padding: 0 1rem;") <strong><a href="https://www.npmjs.com/package/js-sha512">js-sha512</a></strong>
+						li(style="padding: 0 1rem;") <strong><a href="https://www.npmjs.com/package/multer">multer</a></strong>
+						li(style="padding: 0 1rem;") <strong><a href="https://www.npmjs.com/package/sanitizer">sanitizer</a></strong>
+						li(style="padding: 0 1rem;") <strong><a href="https://www.npmjs.com/package/socket.io">socket.io</a></strong>
+						li(style="padding: 0 1rem;") <strong><a href="https://www.npmjs.com/package/node-fetch">node-fetch</a></strong>
+						li(style="padding: 0 1rem;") <strong><a href="https://www.npmjs.com/package/pug">pug</a></strong>
+					<br>
+
+mixin createDisclaimerModal()
+	#disclaimerModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='disclaimerModalLabel', aria-hidden='true')
+		.modal-dialog.modal-lg(role='document')
+			.modal-content
+				.modal-header
+					h5#disclaimerModalLabel.modal-title Disclaimer
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body(style="padding:0;")
+					p(style="padding: 0 1rem;") Welcome to Kiwe, your go-to social media platform for sharing thoughts, ideas, and connecting with others. We value your presence on our platform, but it's essential to understand the following disclaimer and our terms of use to ensure a positive experience for everyone:
+					h3(style="padding: 0 1rem;") 1. User Responsibility:
+					p(style="padding: 0 1rem;") Kiwe is a platform for sharing thoughts, ideas, and information. Users are responsible for the content they post.
+					p(style="padding: 0 1rem;") Users must follow our community guidelines and abide by applicable laws and regulations.
+					h3(style="padding: 0 1rem;") 2. Privacy and Data:
+					p(style="padding: 0 1rem;") We take your privacy seriously. Your personal information and data are protected as per our Privacy Policy.
+					p(style="padding: 0 1rem;") Please be cautious about sharing sensitive or personal information publicly.
+					h3(style="padding: 0 1rem;") 3. Content Ownership:
+					p(style="padding: 0 1rem;") Users retain ownership of their content, but they grant Kiwe a license to use, share, and display it on the platform.
+					p(style="padding: 0 1rem;") Respect intellectual property rights. Do not post copyrighted material without permission.
+					h3(style="padding: 0 1rem;") 4. Respect and Civility:
+					p(style="padding: 0 1rem;") We encourage respectful and constructive discussions. Harassment, hate speech, or any form of abusive behavior is not tolerated.
+					p(style="padding: 0 1rem;") Report any inappropriate content or users to our moderation team.
+					h3(style="padding: 0 1rem;") 5. Third-Party Links:
+					p(style="padding: 0 1rem;") Kiwe may contain links to third-party websites or content. We are not responsible for the content or practices of external websites.
+					h3(style="padding: 0 1rem;") 6. Content Accuracy:
+					p(style="padding: 0 1rem;") Information shared on Kiwe may not always be accurate or up-to-date. Verify information before relying on it.
+					h3(style="padding: 0 1rem;") 7. Moderation:
+					p(style="padding: 0 1rem;") Kiwe reserves the right to moderate and remove content that violates our terms and policies.
+					p(style="padding: 0 1rem;") Users may be subject to sanctions or account suspension if they repeatedly violate our rules.
+					h3(style="padding: 0 1rem;") 8. More information:
+					p(style="padding: 0 1rem;") For more information about our terms and policies, please visit our legal page and see the applicable documents.
+
+mixin createAdminModals()
+	+createVerifyUserModal()
+	+createBanUserModal()
+	+createAddLikeModal()
+	+createStatsModal()
+
+mixin createVerifyUserModal()
+	#verifyUserModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='verifyUserModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#verifyUserModalLabel.modal-title Verify user
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body(id="verifyUserModalBody")
+					span.errorMessage.errorMessageVerify
+					p Username:
+					input#verifyUserUsernameTextbox(type="text", placeholder="Username...")
+					| &nbsp;
+					button#verifySearchButton.btn.btn-primary(type='button') Search
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Cancel
+
+mixin createBanUserModal()
+	#banUserModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='banUserModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#banUserModalLabel.modal-title Ban user
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body(id="banUserModalBody")
+					span.errorMessage.errorMessageBan
+					p Username:
+					input#banUserUsernameTextbox(type="text", placeholder="Username...")
+					| &nbsp;
+					button#banSearchButton.btn.btn-primary(type='button') Search
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Cancel
+
+mixin createAddLikeModal()
+	#addLikeModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='addLikeModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#addLikeModalLabel.modal-title Add like to post
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body(id="addLikeModalBody")
+					span.errorMessage.errorMessageAddLike
+					p Post ID:
+					input#addLikeIdTextbox(type="text", placeholder="Post ID...")
+					| &nbsp;
+					button#addLikeSearchButton.btn.btn-primary(type='button') Search
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Cancel
+
+mixin createStatsModal()
+	#statsModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='statsModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#statsModalLabel.modal-title Stats
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body(id="statsModalBody")
+					span.errorMessage.errorMessageStats
+					button#statsSearchButton.btn.btn-primary(type='button') Refresh
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Cancel
+
+
+mixin createTwoFactorSetupModal()
+	#twoFactorSetupModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='twoFactorSetupModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#twoFactorSetupModalLabel.modal-title 2FA Setup
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body(id="twoFactorSetupModalBody")
+					span.errorMessage.errorMessageTwoFactor
+					button#twoFactorSetupButton.btn.btn-primary(type='button') Setup
+				.modal-footer
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Cancel
+
+mixin createTwoFactorRemovalModal()
+	#twoFactorRemovalModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='twoFactorRemovalModalLabel', aria-hidden='true')
+		.modal-dialog(role='document')
+			.modal-content
+				.modal-header
+					h5#twoFactorRemovalModalLabel.modal-title Disable 2FA
+					button.close(type='button', data-dismiss='modal', aria-label='Close')
+					span(aria-hidden='true') &times;
+				.modal-body(id="twoFactorRemovalModalBody")
+					span.text-danger Are you sure you want to disable 2FA?
+				.modal-footer
+					button#twoFactorDisableButton.btn.btn-primary(type='button', style='background-color:red;') Disable
+					button.btn.btn-secondary(type='button', data-dismiss='modal') Cancel

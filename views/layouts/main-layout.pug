@@ -1,0 +1,90 @@
+include ../mixins/mixins
+
+<!DOCTYPE html>
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    meta(name="theme-color", content="#1D9BF0")
+    link(rel="manifest" href="/manifest.json")
+    title #{pageTitle}
+    link(rel="icon" type="image/png" href="/images/favicon.ico")
+    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.css")
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css", integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N", crossorigin="anonymous")
+    link(rel='stylesheet', href='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.3.2/build/styles/vs2015.min.css')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js')
+    link(href="/css/main.css?v=7", rel="stylesheet")
+  body
+    script.
+      var userLoggedIn = !{userLoggedInJs}
+    .wrapper
+      .row
+        nav.col-2
+          .navBarContainer(style="position: fixed;")
+            a.blue(href="/") 
+              i.fad.fa-kiwi-bird(style="background-color: #eee;padding: 6px;border-radius: 25%;")
+            a(href="/")
+              i.far.fa-home(id="homeButtonIcon")
+            a(href="/search")
+              i.far.fa-search(id="searchButtonIcon")
+            a(href="/notifications")
+              i.far.fa-bell(id="notificationButtonIcon")
+              span#notificationsBadge
+            a(href="/messages")
+              i.far.fa-envelope(id="messageButtonIcon")
+              span#messagesBadge
+            a(href="/profile")
+              i.far.fa-user(id="profileButtonIcon")
+            a(href="/settings")
+              i.far.fa-cog(id="settingsButtonIcon")
+            a(href="/logout") 
+              i.far.fa-sign-out
+        .mainSectionContainer.col-10.col-md-8.col-lg-6
+          .titleContainer 
+            h1 #{pageTitle}
+            block headerButton
+
+          block content
+        .d-none.d-md-block.col-2.col-lg-4(style="padding-left:0;")
+          //- Script to load JSON file and print hashtags
+          script.
+            fetch('/hashtagsFrequency.json')
+              .then(response => response.json())
+              .then(data => {
+                const hashtagsContainer = document.getElementById('hashtags-container');
+                for (const hashtag in data) {
+                  const divTag = document.createElement('div');
+                  divTag.style.borderBottom = '1px solid var(--lightGrey)';
+                  divTag.style.marginTop = '1vh';
+
+                  const aTag = document.createElement('a');
+                  aTag.href = `https://kiwe.social/search/query/%23${hashtag}`; // Replace with your website URL
+                  aTag.innerHTML = `<span style="display: block;font-size:18px;color:var(--blue);padding-left:2.5%;">#${hashtag}</span><span style="display: block;padding-bottom:1vh;color:var(--greyText);padding-left:2.5%;">${data[hashtag]} Posts</span>`;
+
+                  divTag.appendChild(aTag);
+                  hashtagsContainer.appendChild(divTag);
+                }
+              })
+              .catch(error => console.error('Error fetching hashtags:', error));
+          //- Container to hold the hashtags
+
+          div#trendingContainer(style="width:33vw;position:fixed;")
+            div.titleContainer
+              h1 Trending
+            div#hashtags-container(style="margin-top: 1vh;")
+    #notificationList
+          
+    // script(src='https://kit.fontawesome.com/f4df77d797.js' crossorigin='anonymous')
+    link(href="https://cdn.jsdelivr.net/gh/hung1001/font-awesome-pro@4cac1a6/css/all.css" rel="stylesheet" type="text/css")
+
+    script(async='' src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8344095784445905' crossorigin='anonymous')
+    script(src='https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js')
+    script(src='https://code.jquery.com/jquery-3.5.1.min.js', integrity='sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=', crossorigin='anonymous')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.1/socket.io.slim.js')
+    script(src="/js/bootstrap.min.js")
+    
+    block scripts
+
+    script(src="/js/common.js")
+    script(src="/js/clientSocket.js")
